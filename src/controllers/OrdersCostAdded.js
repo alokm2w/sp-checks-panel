@@ -1,7 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 helpers = require('../../helpers/CommonHelpers')
-var csv = require('fast-csv');
 const { parse } = require("csv-parse");
 module.exports = async (req, res) => {
     // console.log(req.query.fileName);
@@ -24,7 +23,7 @@ module.exports = async (req, res) => {
                 dataArr.push(row);
             })
             .on("end", function () {
-                console.log("start filtering result");
+                console.log("start filtering result", helpers.currentDateTime());
 
                 var orderStatus = 4
                 var quote_price = 28
