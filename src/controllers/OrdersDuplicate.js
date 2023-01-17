@@ -6,7 +6,7 @@ var app = express();
 
 module.exports = async (req, res) => {
   try {
-    filename = './ordersTodaycsv/ordersList_today.csv'
+    filename = './ordersTodaycsv/ordersList_today1.csv'
     // var a = fs.readFileSync(filename)
     //   .toString() // convert Buffer to string
     //   .split('\n') // split string to lines
@@ -26,59 +26,24 @@ module.exports = async (req, res) => {
 
         var storeName = 6
         var orderNumber = 3
-        duplicateRecords = dataArray
-          .map(e => e[orderNumber] + '-' + e[storeName])
-          .map((e, i, final) => final.indexOf(e) !== i && i)
-          .filter(obj => dataArray[obj])
-          .map(e => dataArray[e])
+
+        const groupBy = (arr, keys) => {
+          return arr.reduce((acc, obj) => {
+            const key = keys.map(k => obj[k]).join('|');
+            acc[key] = acc[key] || [];
+            acc[key].push(obj);
+            return acc;
+          }, {});
+        }
+
+        const duplicateArr = Object.values(groupBy(dataArray, [orderNumber, storeName])).filter(arr => arr.length > 1);
 
         console.log('done', helpers.currentDateTime());
 
-        if (duplicateRecords.length > 0) {
-          req.flash('success', 'Result Found!')
-        } else {
-          req.flash('error', 'Result Not Found!')
-        }
-
-        res.render('check-orders', {
-          reports: duplicateRecords,
+        res.render('duplicate-orders', {
+          reports: duplicateArr,
           name: "Duplicate Orders",
         });
-
-        // res.send(dataArray)
-        // res.send(a)
-        // let found = []
-        // let dup = {}
-        // var storeName = 6
-        // var orderNumber = 3
-
-        // for (let i = 0; i < a.length; i++) {
-        //   for (let j = i + 1; j < a.length; j++) {
-        //     if (a[i][storeName] === a[j][storeName] && !found.includes(j) && a[i][orderNumber] === a[j][orderNumber] && !found.includes(j)) {
-        //       if (i in dup) {
-        //         found.push(j)
-        //         dup[i].push(a[j])
-        //       } else {
-        //         dup[i] = []
-        //         found.push(i)
-        //         found.push(j)
-        //         dup[i].push(a[i])
-        //         dup[i].push(a[j])
-        //       }
-        //     }
-        //   }
-        // }
-
-        // result = [];
-        // i = 0;
-        // for (const item of Object.keys(dup)) {
-        //   const capital = dup[item];
-        //   for (const duptackorders of capital) {
-        //     result[i] = duptackorders;
-        //     i++
-        //     // console.log(duptackorders[orderNumber], duptackorders[storeName]);
-        //   }
-        // }
       })
       .on("error", function (error) {
         console.log(error.message);

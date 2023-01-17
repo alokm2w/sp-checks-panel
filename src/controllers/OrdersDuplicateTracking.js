@@ -12,7 +12,7 @@ async function genOrdersList(req, res, next) {
   console.log('start execution', helpers.currentDateTime());
   dbconn.query(sqlQueries.query.getOrdersIds, function (err, orderIds) {
     console.log('start reading file', helpers.currentDateTime());
-    filename = './ordersTodaycsv/ordersList_today.csv'
+    filename = './ordersTodaycsv/ordersList_today1.csv'
     var a = fs.readFileSync(filename)
       .toString() // convert Buffer to string
       .split('\n') // split string to lines
@@ -106,7 +106,7 @@ async function genOrdersList(req, res, next) {
     } else {
         req.flash('error', 'Result Not Found!')
     }
-    
+
     res.render('duplicate-tracking', {
       reports: result,
       name: "Duplicate Tracking Numbers",

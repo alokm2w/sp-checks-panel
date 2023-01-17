@@ -42,7 +42,6 @@ module.exports = async (req, res) => {
                     }
                 });
 
-
                 // execute generate csv
                 genrateCSV()
             });
@@ -71,7 +70,7 @@ module.exports = async (req, res) => {
             } else {
                 req.flash('error', 'Result Not Found!')
             }
-        
+
             res.redirect('/')
             // res.render('', {
             //     title: 'service point',
