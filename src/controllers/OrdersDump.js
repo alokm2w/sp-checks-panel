@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
 
   try {
-    filename = './ordersTodaycsv/ordersList_today.csv'
+    filename = './ordersTodaycsv/ordersList_today1.csv'
     console.log('start execution', helpers.currentDateTime());
     let jsonData = csvToJson.getJsonFromCsv(filename);
 
