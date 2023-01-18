@@ -11,6 +11,8 @@ node_modules/
 ordersList/
 ordersTodaycsv/
 ordersYesterdaycsv/
+public/checksList
+public/orderList
 
 #lock file
 package-lock.json

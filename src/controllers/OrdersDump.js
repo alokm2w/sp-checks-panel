@@ -1,46 +1,63 @@
 const express = require('express');
-let csvToJson = require('convert-csv-to-json');
 const fs = require('fs');
-const { Console } = require('console');
 const helpers = require('../../helpers/CommonHelpers')
 const columnArr = require('../../helpers/columnArr');
+const { parse } = require("csv-parse");
 
 module.exports = async (req, res) => {
 
-
   try {
-    filename = './ordersTodaycsv/ordersList_today1.csv'
+    filename = './ordersTodaycsv/ordersList_today.csv'
     console.log('start execution', helpers.currentDateTime());
-    let jsonData = csvToJson.getJsonFromCsv(filename);
 
-    console.log('start grouping');
-    const grouped = helpers.groupBy(jsonData, item => item.StoreName);
+    var dataArr = [];
 
-    console.log('grouped', helpers.currentDateTime());
+    fs.createReadStream(filename)
+      .pipe(parse({ delimiter: ";" }))
+      .on("data", function (row) {
+        dataArr.push(row);
+      })
+      .on("end", function () {
+        console.log('start grouping');
 
-    i = 0;
-    storeWithAvgOrders = [];
-    for (const store of grouped) {
-      if (store[0] != "") {
-        sorted = store[1].filter(val => helpers.formatDate(val['OrderCreatedDate']) >= helpers.getBackDate(6))
-        avgOrder = sorted.length / 7;
-        storeWithAvgOrders[i] = { store: store[0], weeklyOrder: sorted.length, avgOrder: avgOrder.toFixed(2), link: `https://${store[0]}.myshopify.com/admin/orders` }
-        i++
-      }
-    }
+        const groupedData = dataArr.reduce((acc, curr) => {
+          const storeName = curr[columnArr.ColumnIndex.StoreName];
+          if (!acc[storeName]) {
+            acc[storeName] = [];
+          }
+          acc[storeName].push(curr);
+          return acc;
+        }, {});
 
-    console.log('done', helpers.currentDateTime());
+        console.log('grouped', helpers.currentDateTime());
 
-    if (storeWithAvgOrders.length > 0) {
-        req.flash('success', 'Result Found!')
-    } else {
-        req.flash('error', 'Result Not Found!')
-    }
+        i = 0;
+        storeWithAvgOrders = [];
+        for (const store of Object.entries(groupedData)) {
+          if (store[0] != "") {
+            sorted = store[1].filter(val => helpers.formatDate(val[columnArr.ColumnIndex.OrderCreatedDate]) >= helpers.getBackDate(6))
+            avgOrder = sorted.length / 7;
+            storeWithAvgOrders[i] = { store: store[0], weeklyOrder: sorted.length, avgOrder: avgOrder.toFixed(2), link: `https://${store[0]}.myshopify.com/admin/orders` }
+            i++
+          }
+        }
 
-    res.render('average-order', {
-      reports: storeWithAvgOrders,
-      name: "Orders Dump/Week",
-    });
+        console.log('done', helpers.currentDateTime());
+
+        if (storeWithAvgOrders.length > 0) {
+          req.flash('success', 'Result Found!')
+        } else {
+          req.flash('error', 'Result Not Found!')
+        }
+
+        res.render('average-order', {
+          reports: storeWithAvgOrders,
+          name: "Orders Dump/Week",
+        });
+      })
+      .on("error", function (error) {
+        console.log(error.message);
+      });
 
   } catch (error) {
     res.status(500).send(`Something went wrong! ${error}`)

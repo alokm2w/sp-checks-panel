@@ -99,6 +99,7 @@ const genOrdersArr = (ArrData) => {
             "Fee/Order": DecodeData.changeAmountFormat(row['Fee/Order']),
             "Affiliate Fee": DecodeData.changeAmountFormat(row['Affiliate Fee']),
             "Agent Fee": DecodeData.changeAmountFormat(row['Agent Fee']),
+            "Store Id": row['Store Id'],
         };
         myArr.push(orderDetails);
     }
@@ -165,7 +166,8 @@ const csvHeaderArr = [
     { id: 'Client Name', title: 'Client Name' },
     { id: 'Fee/Order', title: 'Fee/Order' },
     { id: 'Affiliate Fee', title: 'Affiliate Fee' },
-    { id: 'Agent Fee', title: 'Agent Fee' }
+    { id: 'Agent Fee', title: 'Agent Fee' },
+    { id: 'Store Id', title: 'Store Id' }
 ];
 
 

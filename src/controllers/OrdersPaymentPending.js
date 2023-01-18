@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 
                 const status_arr = ["Address error", "Cancelled", "Fulfilled", "Hold", "Refund", "Not quoted"];
 
-                let result = dataArr.filter(item => item[OrderFinancialStatus] != undefined && item[OrderFinancialStatus].toLowerCase() != "paid" && !status_arr.includes(item[orderStatus]));
+                let result = dataArr.filter(item => item[OrderFinancialStatus] != undefined && item[OrderFinancialStatus] != 'Order Financial Status' && item[OrderFinancialStatus].toLowerCase() != "paid" && !status_arr.includes(item[orderStatus]));
 
                 console.log('Done', helpers.currentDateTime());
 

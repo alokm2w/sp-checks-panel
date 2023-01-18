@@ -60,7 +60,7 @@ ColumnIndex = {
     FeeOrder : 57,
     AffiliateFee : 58,
     AgentFee : 59,
+    StoreId : 60
 }
-
 
 module.exports = { ColumnIndex }

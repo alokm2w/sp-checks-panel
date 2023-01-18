@@ -7,14 +7,8 @@ module.exports = async (req, res) => {
     // console.log(req.query.fileName);
 
     try {
-        filename = 'ordersTodaycsv/ordersList_today1.csv'
+        filename = 'ordersTodaycsv/ordersList_today.csv'
         console.log('start execution', helpers.currentDateTime());
-
-        // var arr = fs.readFileSync(filename)
-        //     .toString() // convert Buffer to string
-        //     .split('\n') // split string to lines
-        //     .map(e => e.trim()) // remove white spaces for each line
-        //     .map(e => e.split(';').map(e => e.trim())); // split each line to array
 
         var dataArr = [];
 

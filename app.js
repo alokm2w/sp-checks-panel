@@ -5,17 +5,20 @@ const Routes = require('./routes/index');
 const async = require('async');
 var app = express();
 const cron = require("node-cron");
-
-
+const { parse } = require("csv-parse");
+const stringify = require('csv-stringify');
+const CommonHelpers = require('./helpers/CommonHelpers');
+const columnArr = require('./helpers/columnArr');
 const helpers = require('./helpers/csv_helpers');
 const sql_queries = require('./src/models/sql_queries')
 const dbconn1 = require('./dbconnection'); // node
 const dbconn2 = require('./dbconnection2'); // sp
+const method = require('./methods/index');
 const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 var rimraf = require("rimraf");
 require('dotenv').config();
-process.env.TZ = 'Europe/Amsterdam'; //set timezone
+// process.env.TZ = 'Europe/Amsterdam'; //set timezone
 
 
 app.engine('ejs', require('express-ejs-extend'));
@@ -32,32 +35,45 @@ var server = app.listen(5000, () => {
     console.log(`Server is running on url 5000`);
 });
 
-function exportcsv() {
+var filename = 'ordersTodaycsv/ordersList_today.csv';
 
-    var sqlQuery = sql_queries.query.orders.get_orders_detail;
-
-    dbconn2.query(sqlQuery, function (error, data, fields) {
-
+function exportcsv(callback) {
+    var sqlQuery = sql_queries.query.get_orders_detail;
+    console.log('start fetching records', helpers.currentDateTime())
+    dbconn2.query(sqlQuery, async function (error, data, fields) {
         if (error) {
             throw error;
         } else {
-            var filename = 'OrdersList_' + helpers.currentDateTime();
-            const zipFileDir = './ordersList'
-            console.log('start generating csv');
+            console.log('start execution', helpers.currentDateTime());
+            var filename = 'ordersList_today';
+            // var filename = 'OrdersList_' + helpers.currentDateTime();
+            const zipFileDir = './ordersList';
 
             // delete ordersList dir
             rimraf(zipFileDir, function () {
                 // create temp directory
-                const dir = './temp'
+                const dir = './ordersTodaycsv'
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir);
                 }
+
+                const currentPath = `./ordersTodaycsv/ordersList_today.csv`;
+                const destinationPath = "./ordersYesterdaycsv/ordersList_yeterday.csv";
+
+                fs.rename(currentPath, destinationPath, function (err) {
+                    if (err) {
+                        throw err
+                    } else {
+                        console.log("Successfully moved the file!", helpers.currentDateTime());
+                    }
+                });
+
                 // execute generate csv
                 genrateCSV()
             });
 
             const csvWriter = createCsvWriter({
-                path: `temp/${filename}.csv`,
+                path: `ordersTodaycsv/ordersList_today.csv`,
                 header: helpers.csvHeaderArr,
                 fieldDelimiter: ';'
             });
@@ -73,34 +89,54 @@ function exportcsv() {
 
                 // convert to zip
                 helpers.genCsvToZip(zipFileDir, filename)
+                    .then(callback(null, 'csv generated'))
             }
         }
-    });
+    })
 }
 
-function method1(callback) {
-    console.log('1')
-    callback(null, 'result1');
+dataArr = [];
+
+function getOrdersCsvData(callback) {
+    try {
+        console.log('start reading file', helpers.currentDateTime());
+
+        fs.createReadStream(filename)
+            .pipe(parse({ delimiter: ";" }))
+            .on("data", function (row) {
+                dataArr.push(row);
+            })
+            .on("end", function () {
+                console.log('File Readed!', helpers.currentDateTime());
+                method.orderCostAdded(dataArr);
+                method.orderDump(dataArr);
+                method.orderDuplicate(dataArr);
+                method.orderInTransitDateIsShipped(dataArr);
+                method.ordersInTransitDateWithStatus(dataArr);
+                method.ordersMissingInfo(dataArr);
+                method.ordersNoDateOfPayment(dataArr);
+                method.ordersNoMaxTime(dataArr);
+                method.ordersNoPaidOnPaidByShopOwner(dataArr)
+                method.ordersNoSupplierAdded(dataArr)
+                method.ordersNotQuoted(dataArr)
+                method.ordersNoTrackingAdded(dataArr)
+                method.ordersOnHold(dataArr)
+                method.ordersPaymentPending(dataArr)
+                method.ordersShortTrackingNumber(dataArr)
+                method.ordersTrackingNumberAdded(dataArr)
+            })
+            .on("error", function (error) {
+                console.log(error.message);
+            });
+    } catch (error) {
+        console.log(`Something went wrong! ${error}`)
+        callback(null, 'error');
+    }
 }
 
-function method2(callback) {
-    // method code here
+const methods = [exportcsv, getOrdersCsvData];
 
-    console.log('2')
-    callback(null, 'result2');
-}
-
-function method10(callback) {
-    // method code here
-
-    console.log('10')
-    callback(null, 'result10');
-}
-
-const methods = [exportcsv, method1, method2, method10];
-
-cron.schedule("00 56 20 * * *", () => {
-    console.log("Cron Scheduler Start");
+cron.schedule('00 31 18 * * *', () => {
     async.series(methods, (err, results) => {
         if (err) {
             console.error(err);
@@ -108,5 +144,4 @@ cron.schedule("00 56 20 * * *", () => {
             console.log(results);
         }
     });
-    console.log("Running a task at " + helpers.currentDateTime());
 });
