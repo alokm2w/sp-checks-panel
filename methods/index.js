@@ -3,7 +3,10 @@ const CommonHelpers = require('../helpers/CommonHelpers');
 const columnArr = require('../helpers/columnArr');
 const helpers = require('../helpers/csv_helpers');
 const fs = require('fs');
-
+const fastCsv = require('fast-csv');
+const dbconn = require('../dbconnection');
+const dbconn2 = require('../dbconnection2');
+const sqlQueries = require('../src/models/sql_queries');
 
 
 function orderCostAdded(dataArr) {
@@ -74,10 +77,18 @@ function orderDuplicate(dataArr) {
 
         const duplicateArr = Object.values(groupBy(dataArr, [columnArr.ColumnIndex.OrderNumber, columnArr.ColumnIndex.StoreName])).filter(arr => arr.length > 1);
 
-        const csvData = duplicateArr.map(d => d.join(';')).join('\n').replace(/"/g, "'");
-        fs.writeFileSync('./public/checksList/ordersDuplicate.csv', csvData);
-
-        console.log('Orders Duplicate Done!', helpers.currentDateTime());
+        let newData = []
+        for (let i = 0; i < duplicateArr.length; i++) {
+            for (let j = 0; j < duplicateArr[i].length; j++) {
+                newData.push(duplicateArr[i][j])
+            }
+        }
+        const ws = fs.createWriteStream('./public/checksList/ordersDuplicate.csv');
+        fastCsv.write(newData, { headers: true, delimiter: ';' })
+            .pipe(ws)
+            .on('finish', () => {
+                console.log('Orders Duplicate Done!', helpers.currentDateTime());
+            });
     } catch (error) {
         console.log(`Something went wrong! ${error}`)
     }
@@ -272,4 +283,28 @@ function ordersTrackingNumberAdded(dataArr) {
     }
 }
 
-module.exports = { orderCostAdded, orderDump, orderDuplicate, orderInTransitDateIsShipped, ordersInTransitDateWithStatus, ordersMissingInfo, ordersNoDateOfPayment, ordersNoMaxTime, ordersNoPaidOnPaidByShopOwner, ordersNoSupplierAdded, ordersNotQuoted, ordersNoTrackingAdded, ordersOnHold, ordersPaymentPending, ordersShortTrackingNumber, ordersTrackingNumberAdded }
+function getStores() {
+
+    dbconn2.query(sqlQueries.query.getStores, function (err, data) {
+        if (err) throw err
+
+        data.forEach(function (val, i) {
+            dbconn.query(`SELECT id FROM stores where store_id = ${val.id}`, function (err, results, fields) {
+                if (err) throw err;
+
+                if (results.length > 0) {
+                    CreateOrUpdate = `UPDATE stores SET store_name = '${val.name}', is_deleted = '${val.is_deleted}' WHERE store_id = '${val.id}'`;
+                } else {
+                    CreateOrUpdate = `INSERT INTO stores (store_id, store_name, is_deleted) VALUES ('${val.id}', '${val.name}', '${val.is_deleted}')`;
+                }
+
+                dbconn.query(CreateOrUpdate, function (err, data2) {
+                    if (err) throw err
+                })
+            });
+        })
+        console.log('Get Store Done!');
+    })
+}
+
+module.exports = { orderCostAdded, orderDump, orderDuplicate, orderInTransitDateIsShipped, ordersInTransitDateWithStatus, ordersMissingInfo, ordersNoDateOfPayment, ordersNoMaxTime, ordersNoPaidOnPaidByShopOwner, ordersNoSupplierAdded, ordersNotQuoted, ordersNoTrackingAdded, ordersOnHold, ordersPaymentPending, ordersShortTrackingNumber, ordersTrackingNumberAdded, getStores }

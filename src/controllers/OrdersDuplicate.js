@@ -13,30 +13,17 @@ module.exports = async (req, res) => {
     fs.createReadStream(filename)
       .pipe(parse({ delimiter: ";" }))
       .on("data", function (row) {
-        var arrayToString = JSON.stringify(Object.assign({}, row));  // convert array to string
-        var stringToJsonObject = JSON.parse(arrayToString);
-        dataArray.push(stringToJsonObject);
+        dataArray.push(row)
       })
       .on("end", function () {
-
-        var storeName = 6
-        var orderNumber = 3
-
-        const groupBy = (arr, keys) => {
-          return arr.reduce((acc, obj) => {
-            const key = keys.map(k => obj[k]).join('|');
-            acc[key] = acc[key] || [];
-            acc[key].push(obj);
-            return acc;
-          }, {});
+        if (dataArray.length > 0) {
+          req.flash('success', 'Result Found!')
+        } else {
+          req.flash('error', 'Result Not Found!')
         }
 
-        const duplicateArr = Object.values(groupBy(dataArray, [orderNumber, storeName])).filter(arr => arr.length > 1);
-
-        console.log('done', helpers.currentDateTime());
-
         res.render('duplicate-orders', {
-          reports: duplicateArr,
+          reports: dataArray,
           name: "Duplicate Orders",
         });
       })

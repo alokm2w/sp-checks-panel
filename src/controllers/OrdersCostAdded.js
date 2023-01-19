@@ -7,7 +7,6 @@ module.exports = async (req, res) => {
     // console.log(req.query.fileName);
 
     try {
-        // filename = 'ordersTodaycsv/ordersList_today.csv'
         filename = './public/checksList/ordersCostAdded.csv'
         console.log('start execution', helpers.currentDateTime());
 
@@ -19,17 +18,6 @@ module.exports = async (req, res) => {
                 dataArr.push(row);
             })
             .on("end", function () {
-                // console.log("start filtering result", helpers.currentDateTime());
-
-                // var orderStatus = 4
-                // var quote_price = 28
-
-                // const status_arr = ["Waiting for tracking update", "In transit", "Processing", "Fulfilled"];
-
-                // let result = dataArr.filter(item => !status_arr.includes(item[orderStatus]) && item[quote_price] != 0);
-
-                // console.log('done', helpers.currentDateTime());
-
                 if (dataArr.length > 0) {
                     req.flash('success', 'Result Found!')
                 } else {

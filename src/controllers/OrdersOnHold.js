@@ -5,32 +5,23 @@ const { parse } = require("csv-parse");
 
 module.exports = async (req, res) => {
     try {
-        console.log('start execution', helpers.currentDateTime());
-        filename = './ordersTodaycsv/ordersList_today.csv';
-
+        filename = './public/checksList/ordersOnHold.csv'
         var dataArr = [];
-
         fs.createReadStream(filename)
             .pipe(parse({ delimiter: ";" }))
             .on("data", function (row) {
                 dataArr.push(row);
             })
             .on("end", function () {
-                console.log("start filtering result", helpers.currentDateTime());
 
-                let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderStatus] == "Hold" && item[columnArr.ColumnIndex.AdminSupplierName] != "" ||
-                    item[columnArr.ColumnIndex.OrderStatus] == "Hold" && item[columnArr.ColumnIndex.supplierName] != ""
-                );
-                console.log('Done', helpers.currentDateTime());
-
-                if (result.length > 0) {
+                if (dataArr.length > 0) {
                     req.flash('success', 'Result Found!')
                 } else {
                     req.flash('error', 'Result Not Found!')
                 }
 
                 res.render('check-orders', {
-                    reports: result,
+                    reports: dataArr,
                     name: "Orders On Hold",
                 });
             })

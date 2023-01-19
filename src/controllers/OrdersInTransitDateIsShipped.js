@@ -8,7 +8,7 @@ const { parse } = require("csv-parse");
 module.exports = async (req, res) => {
 
     try {
-        filename = './ordersTodaycsv/ordersList_today.csv'
+        filename = './public/checksList/orderInTransitDateIsShipped.csv'
         console.log('start execution', helpers.currentDateTime());
 
         var dataArr = [];
@@ -19,21 +19,15 @@ module.exports = async (req, res) => {
                 dataArr.push(row);
             })
             .on("end", function () {
-                console.log("start filtering result", helpers.currentDateTime());
 
-                var isShipped = 31
-                var inTransitDate = 48
-                let result = dataArr.filter(item => item[inTransitDate] != "" && item[isShipped] == 0);
-                console.log('Done', helpers.currentDateTime());
-
-                if (result.length > 0) {
+                if (dataArr.length > 0) {
                     req.flash('success', 'Result Found!')
                 } else {
                     req.flash('error', 'Result Not Found!')
                 }
 
                 res.render('check-orders', {
-                    reports: result,
+                    reports: dataArr,
                     name: "In-Transit Date with is shipped 0",
                 });
             })

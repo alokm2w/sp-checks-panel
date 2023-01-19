@@ -28,6 +28,7 @@ const OrdersTrackingNumberAdded = require('../src/controllers/OrdersTrackingNumb
 const OrdersInTransitDateWithStatus = require('../src/controllers/OrdersInTransitDateWithStatus');
 const OrdersDuplicate = require('../src/controllers/OrdersDuplicate');
 const OrdersInTransitDateIsShipped = require('../src/controllers/OrdersInTransitDateIsShipped');
+const OrdersMissingByStore = require('../src/controllers/OrdersMissingByStore');
 const OrdersDump = require('../src/controllers/OrdersDump');
 const OrdersMissing = require('../src/controllers/OrdersMissing');
 const OrdersMixup = require('../src/controllers/OrdersMixup');
@@ -62,6 +63,7 @@ app.get('/in-transit-date-is-shipped', OrdersInTransitDateIsShipped);
 app.get('/orders-dump', OrdersDump);
 app.get('/orders-missing', OrdersMissing);
 app.get('/order-mixup', OrdersMixup);
+app.get('/stores-list', OrdersMissingByStore);
 
 
 app.get('/check-today-orders', function (req, res, next) {

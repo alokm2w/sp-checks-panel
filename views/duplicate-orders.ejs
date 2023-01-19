@@ -134,38 +134,36 @@
                                     </thead>
                                     <tbody>
                                         <% if(reports.length> 0){ %>
-                                            <% for (var i=0; i < reports.length; i++) { %>
-                                                <% for (var j=0; j < reports[i].length; j++) { %>
+                                            <% reports.forEach(function( val, i) { %>
+                                                <tr>
+                                                    <th scope="row">
+                                                        <%= i+1 %>
+                                                    </th>
+                                                    <td>
+                                                        <%= val[53] %>
+                                                    </td>
+                                                    <td>
+                                                        <%= val[1] %>
+                                                    </td>
+                                                    <td>
+                                                        <%= val[3] %>
+                                                    </td>
+                                                    <td>
+                                                        <%= val[27] %>
+                                                    </td>
+                                                    <td>
+                                                        <%= val[39] %>
+                                                    </td>
+                                                    <td>
+                                                        <%= val[56] %>
+                                                    </td>
+                                                </tr>
+                                                <% }) }else{ %>
                                                     <tr>
-                                                        <th scope="row">
-                                                            <%= i+1 %>
+                                                        <th scope="row" colspan="7" class="text-center"> Not Available
                                                         </th>
-                                                        <td>
-                                                            <%= reports[i][j][53] ? reports[i][j][53] : "N/A" ; %>
-                                                        </td>
-                                                        <td>
-                                                            <%= reports[i][j][1] ? reports[i][j][1] : "N/A" ; %>
-                                                        </td>
-                                                        <!-- <td></td> -->
-                                                        <td>
-                                                            <%= reports[i][j][3] ? reports[i][j][3] : "N/A" ; %>
-                                                        </td>
-                                                        <td>
-                                                            <%= reports[i][j][27] ? reports[i][j][27] : "N/A" ; %>
-                                                        </td>
-                                                        <td>
-                                                            <%= reports[i][j][39] ? reports[i][j][39] : "N/A" ; %>
-                                                        </td>
-                                                        <td>
-                                                            <%= reports[i][j][56] ? reports[i][j][56] : "N/A" ; %>
-                                                        </td>
                                                     </tr>
-                                                <% } } }else{ %>
-                                                    <tr>
-                                                        <th scope="row" colspan="7" class="text-center"> Not
-                                                            Available</th>
-                                                    </tr>
-                                            <% } %>
+                                                    <% } %>
                                     </tbody>
                                 </table>
                             </div>

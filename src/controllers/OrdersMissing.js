@@ -9,7 +9,7 @@ const sqlQueries = require('../models/sql_queries');
 module.exports = async (req, res) => {
 
     try {
-        filename = './ordersTodaycsv/ordersList_today.csv'
+        filename = './ordersTodaycsv/ordersList_today11.csv'
         console.log('start execution', helpers.currentDateTime());
         let json = csvToJson.getJsonFromCsv(filename);
 
