@@ -6,7 +6,7 @@ var app = express();
 
 module.exports = async (req, res) => {
   try {
-    filename = './ordersTodaycsv/ordersList_today.csv'
+    filename = './public/checksList/ordersDuplicate.csv'
 
     console.log('Execution Start', helpers.currentDateTime());
     var dataArray = [];

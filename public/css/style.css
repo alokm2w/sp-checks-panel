@@ -55,7 +55,7 @@ body {
 }
 
 .btn-bg-blue {
-  background-color: #131946;
+  background-color: #131946!important;
 }
 
 .cross-btn {

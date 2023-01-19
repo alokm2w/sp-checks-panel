@@ -16,7 +16,7 @@ function orderCostAdded(dataArr) {
         const status_arr = ["Waiting for tracking update", "In transit", "Processing", "Fulfilled"];
         let result = dataArr.filter(item => !status_arr.includes(item[orderStatus]) && item[quote_price] != 0);
 
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersCostAdded.csv', csvData);
 
         console.log('Orders Cost Added Done!', helpers.currentDateTime());
@@ -50,7 +50,7 @@ function orderDump(dataArr) {
             }
         }
 
-        const csvData = storeWithAvgOrders.map(d => d.join(';')).join('\n');
+        const csvData = storeWithAvgOrders.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersDump.csv', csvData);
 
         console.log('Orders Dump Done!', helpers.currentDateTime());
@@ -74,7 +74,7 @@ function orderDuplicate(dataArr) {
 
         const duplicateArr = Object.values(groupBy(dataArr, [columnArr.ColumnIndex.OrderNumber, columnArr.ColumnIndex.StoreName])).filter(arr => arr.length > 1);
 
-        const csvData = duplicateArr.map(d => d.join(';')).join('\n');
+        const csvData = duplicateArr.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersDuplicate.csv', csvData);
 
         console.log('Orders Duplicate Done!', helpers.currentDateTime());
@@ -87,7 +87,7 @@ function orderInTransitDateIsShipped(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.IntransitDate] != "" && item[columnArr.ColumnIndex.is_shipped] == 0);
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/orderInTransitDateIsShipped.csv', csvData);
 
         console.log('Orders In-Transit Date Is Shipped Done!', helpers.currentDateTime());
@@ -100,7 +100,7 @@ function ordersInTransitDateWithStatus(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderStatus] != undefined && item[columnArr.ColumnIndex.OrderStatus].toLowerCase() == "waiting for tracking update" && item[columnArr.ColumnIndex.IntransitDate] != "");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersInTransitDateWithStatus.csv', csvData);
 
         console.log('Orders In-Transit Date With Status Done!', helpers.currentDateTime());
@@ -113,7 +113,7 @@ function ordersMissingInfo(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.AgentSupportName] == "" || item[columnArr.ColumnIndex.StoreName] == "" || item[columnArr.ColumnIndex.OrderCreatedDate] == "");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersMissingInfo.csv', csvData);
 
         console.log('Orders Missing Info Done!', helpers.currentDateTime());
@@ -126,7 +126,7 @@ function ordersNoDateOfPayment(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.DateofPayment] == "" && item[columnArr.ColumnIndex.PaiByShopOwner].toLowerCase() == "paid");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNoDateOfPayment.csv', csvData);
 
         console.log('Orders No Date Of Payment Done!', helpers.currentDateTime());
@@ -143,7 +143,7 @@ function ordersNoMaxTime(dataArr) {
             item[columnArr.ColumnIndex.DateofPayment.MaxDelieveryTime] == "" && item[columnArr.ColumnIndex.DateofPayment.supplierName] != "" ||
             item[columnArr.ColumnIndex.DateofPayment.MaxDelieveryTime] == "" && item[columnArr.ColumnIndex.DateofPayment.AdminSupplierName] != ""
         );
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNoMaxTime.csv', csvData);
 
         console.log('Orders No Max Time Done!', helpers.currentDateTime());
@@ -156,7 +156,7 @@ function ordersNoPaidOnPaidByShopOwner(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.PaiByShopOwner] != undefined && item[columnArr.ColumnIndex.DateofPayment] != "" && item[columnArr.ColumnIndex.PaiByShopOwner].toLowerCase() == "pending");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNoPaidOnPaidByShopOwner.csv', csvData);
 
         console.log('OrdersNoPaidOnPaidByShopOwner Done!', helpers.currentDateTime());
@@ -176,7 +176,7 @@ function ordersNoSupplierAdded(dataArr) {
             item[columnArr.ColumnIndex.OrderStatus] == "Fulfilled" && item[columnArr.ColumnIndex.OrderTrackingNumber] != "" && item[columnArr.ColumnIndex.AdminSupplierName] == "" ||
             item[columnArr.ColumnIndex.OrderStatus] == "Fulfilled" && item[columnArr.ColumnIndex.OrderTrackingNumber] != "" && item[columnArr.ColumnIndex.supplierName] == ""
         );
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNoSupplierAdded.csv', csvData);
 
         console.log('OrdersNoSupplierAdded!', helpers.currentDateTime());
@@ -193,7 +193,7 @@ function ordersNotQuoted(dataArr) {
             item[columnArr.ColumnIndex.OrderStatus] == "Not quoted" && item[columnArr.ColumnIndex.OrderProcessingDate] != "" ||
             item[columnArr.ColumnIndex.OrderStatus] == "Not quoted" && item[columnArr.ColumnIndex.PaiByShopOwner] != ""
         );
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNotQuoted.csv', csvData);
 
         console.log('OrdersNotQuoted Done!', helpers.currentDateTime());
@@ -207,7 +207,7 @@ function ordersNoTrackingAdded(dataArr) {
         console.log('start execution');
         const status_arr = ["Waiting for tracking update", "In transit"];
         let result = dataArr.filter(item => status_arr.includes(item[columnArr.ColumnIndex.OrderStatus]) && item[columnArr.ColumnIndex.OrderTrackingNumber] == "");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersNoTrackingAdded.csv', csvData);
 
         console.log('OrdersNoTrackingAdded Done!', helpers.currentDateTime());
@@ -222,7 +222,7 @@ function ordersOnHold(dataArr) {
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderStatus] == "Hold" && item[columnArr.ColumnIndex.AdminSupplierName] != "" ||
             item[columnArr.ColumnIndex.OrderStatus] == "Hold" && item[columnArr.ColumnIndex.supplierName] != ""
         );
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersOnHold.csv', csvData);
 
         console.log('OrdersOnHold Done!', helpers.currentDateTime());
@@ -237,7 +237,7 @@ function ordersPaymentPending(dataArr) {
         const status_arr = ["Address error", "Cancelled", "Fulfilled", "Hold", "Refund", "Not quoted"];
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderFinancialStatus] != undefined && item[columnArr.ColumnIndex.OrderFinancialStatus] != 'Order Financial Status' && item[columnArr.ColumnIndex.OrderFinancialStatus].toLowerCase() != "paid" && !status_arr.includes(item[columnArr.ColumnIndex.OrderStatus]));
 
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersPaymentPending.csv', csvData);
 
         console.log('ordersPaymentPending Done!', helpers.currentDateTime());
@@ -250,7 +250,7 @@ function ordersShortTrackingNumber(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderTrackingNumber] && item[columnArr.ColumnIndex.OrderTrackingNumber] != "" && item[columnArr.ColumnIndex.OrderTrackingNumber].length < 10);
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersShortTrackingNumber.csv', csvData);
 
         console.log('ordersShortTrackingNumber Done!', helpers.currentDateTime());
@@ -263,7 +263,7 @@ function ordersTrackingNumberAdded(dataArr) {
     try {
         console.log('start execution');
         let result = dataArr.filter(item => item[columnArr.ColumnIndex.OrderStatus] == "Processing" && item[columnArr.ColumnIndex.OrderTrackingNumber] != "");
-        const csvData = result.map(d => d.join(';')).join('\n');
+        const csvData = result.map(d => d.join(';')).join('\n').replace(/"/g, "'");
         fs.writeFileSync('./public/checksList/ordersTrackingNumberAdded.csv', csvData);
 
         console.log('ordersTrackingNumberAdded Done!', helpers.currentDateTime());
