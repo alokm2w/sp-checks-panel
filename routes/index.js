@@ -28,19 +28,18 @@ const OrdersTrackingNumberAdded = require('../src/controllers/OrdersTrackingNumb
 const OrdersInTransitDateWithStatus = require('../src/controllers/OrdersInTransitDateWithStatus');
 const OrdersDuplicate = require('../src/controllers/OrdersDuplicate');
 const OrdersInTransitDateIsShipped = require('../src/controllers/OrdersInTransitDateIsShipped');
-const OrdersMissingByStore = require('../src/controllers/OrdersMissingByStore');
+const OrdersAllowedMissing = require('../src/controllers/OrdersAllowedMissing');
 const OrdersDump = require('../src/controllers/OrdersDump');
 const OrdersMissing = require('../src/controllers/OrdersMissing');
 const OrdersMixup = require('../src/controllers/OrdersMixup');
 const sqlQueries = require('../src/models/sql_queries');
-
 
 /* GET home page. */
 app.get('/', function (req, res, next) {
   res.render('check-orders', {
     reports: [],
     name: "",
-});
+  });
 });
 
 // Routes
@@ -63,76 +62,74 @@ app.get('/in-transit-date-is-shipped', OrdersInTransitDateIsShipped);
 app.get('/orders-dump', OrdersDump);
 app.get('/orders-missing', OrdersMissing);
 app.get('/order-mixup', OrdersMixup);
-app.get('/stores-list', OrdersMissingByStore);
+app.get('/stores-list', OrdersAllowedMissing);
 
 
 app.get('/check-today-orders', function (req, res, next) {
-    res.render('check-orders', {
-        reports: [],
-        name: "",
-    });
+  res.render('check-orders', {
+    reports: [],
+    name: "",
+  });
 });
 
 app.post('/add_order_id', function (req, res, next) {
-    dbconn.query(`INSERT INTO filter_orderids (orders_id) VALUES ("${req.body.orders_id}")`, function (err, result) {
-        if (err) throw err
-        dbconn.query(sqlQueries.query.getOrdersIds, function (err, result) {
-            if (err) throw err
-            req.flash('success', 'Data stored!')
-            res.redirect('/duplicate-tracking');
-        })
+  dbconn.query(`INSERT INTO filter_orderids (orders_id) VALUES ("${req.body.orders_id}")`, function (err, result) {
+    if (err) throw err
+    dbconn.query(sqlQueries.query.getOrdersIds, function (err, result) {
+      if (err) throw err
+      req.flash('success', 'Data stored!')
+      res.redirect('/duplicate-tracking');
     })
+  })
 })
 
 app.get('/delete-order-id', function (req, res) {
-    var sqlDeleteQuery = `DELETE FROM filter_orderids WHERE orders_id=${req.query.orderId}`;
-    dbconn.query(sqlDeleteQuery, function (err, result) {
-        if (err) throw err
-        req.flash('error', 'Data deleted!')
-        res.redirect('/duplicate-tracking');
-    })
+  var sqlDeleteQuery = `DELETE FROM filter_orderids WHERE orders_id=${req.query.orderId}`;
+  dbconn.query(sqlDeleteQuery, function (err, result) {
+    if (err) throw err
+    req.flash('error', 'Data deleted!')
+    res.redirect('/duplicate-tracking');
+  })
 });
 
 app.post('/update-missing-order', function (req, res) {
-    console.log(req.query.id, req.query.missingNumber);
-    var sqlDeleteQuery = `UPDATE allowed_missing_order SET allowed_number = ${req.body.missingNumber} WHERE id = ${req.body.id}`;
-    dbconn.query(sqlDeleteQuery, function (err, result) {
-        if (err) throw err
-        req.flash('success', 'Data updated!')
-        res.redirect('/orders-missing');
-    })
+  var sqlDeleteQuery = `UPDATE stores SET allowed_missing_orders = ${req.body.missingNumber} WHERE store_id = ${req.body.id}`;
+  dbconn.query(sqlDeleteQuery, function (err, result) {
+    if (err) throw err
+    req.flash('success', 'Data updated!')
+    res.redirect('/stores-list');
+  })
 });
-
 
 // Orders List Page
 app.get("/orders-export", (req, res) => {
-    res.render('order-export', {
-        title: 'Service Point',
-        orderFileLink: '',
-        productFileLink: '',
-    });
+  res.render('order-export', {
+    title: 'Service Point',
+    orderFileLink: '',
+    productFileLink: '',
+  });
 });
 
 // export orders csv
 app.get('/api/convertcsv', convertcsv);
 
 // download orders zip
-app.get('/download-orders-list/:filename?', function(req, res){
+app.get('/download-orders-list/:filename?', function (req, res) {
   const file = `./ordersList/${req.params.filename}`;
   res.download(file);
 });
 
 // Api orders zip
-app.get('/download-orders', function(req, res){
+app.get('/download-orders', function (req, res) {
   const clientIp = requestIp.getClientIp(req);
   console.log('IP=', clientIp);
   if (!process.env.IP_ADDRESS.includes(req.ip) && 0) { // Wrong IP address
     res.send('permission denied');
-  }else{
+  } else {
     var files = fs.readdirSync('./ordersList');
     storefilename = files[0];
-    if(typeof(storefilename) != 'undefined'){
-      res.sendFile(path.resolve("./"+`/ordersList/${storefilename}`));
+    if (typeof (storefilename) != 'undefined') {
+      res.sendFile(path.resolve("./" + `/ordersList/${storefilename}`));
     } else {
       res.send(`File Not Available:${storefilename}`);
     }

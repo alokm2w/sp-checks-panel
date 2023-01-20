@@ -11,10 +11,10 @@ module.exports = async (req, res) => {
     try {
         console.log('start execution', helpers.currentDateTime());
 
-        dbconn.query(sqlQueries.query.getStores, function (err, data) {
+        dbconn.query(sqlQueries.query.getStoresWithAllowedMissing, function (err, data) {
             if (err) throw err
-res.send(data);
-
+// res.send(data[0]);
+//
             // console.log('Done',helpers.currentDateTime());
 
             // if (MissingOrders.length > 0) {
@@ -23,11 +23,12 @@ res.send(data);
             //     req.flash('error', 'Result Not Found!')
             // }
 
-            // res.render('missing-orders', {
-            //     reports: MissingOrders,
-            //     name: "Missing Orders",
-            //     data: data[0]
-            // });
+
+            res.render('stores-list', {
+                reports: data,
+                name: "Missing Orders",
+                data: data[0]
+            });
         })
     } catch (error) {
         res.status(500).send(`Something went wrong! ${error}`)

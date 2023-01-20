@@ -6,9 +6,6 @@ const async = require('async');
 var app = express();
 const cron = require("node-cron");
 const { parse } = require("csv-parse");
-const stringify = require('csv-stringify');
-const CommonHelpers = require('./helpers/CommonHelpers');
-const columnArr = require('./helpers/columnArr');
 const helpers = require('./helpers/csv_helpers');
 const sql_queries = require('./src/models/sql_queries')
 const dbconn1 = require('./dbconnection'); // node
@@ -19,7 +16,6 @@ const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 var rimraf = require("rimraf");
 require('dotenv').config();
 // process.env.TZ = 'Europe/Amsterdam'; //set timezone
-
 
 app.engine('ejs', require('express-ejs-extend'));
 app.set('view engine', 'ejs');
@@ -35,7 +31,7 @@ var server = app.listen(5000, () => {
     console.log(`Server is running on url 5000`);
 });
 
-var filename = 'ordersTodaycsv/ordersList_today.csv';
+var filename = process.env.FILENAME_RECENT;
 
 function exportcsv(callback) {
     var sqlQuery = sql_queries.query.get_orders_detail;
@@ -102,11 +98,21 @@ function getOrdersCsvData(callback) {
         console.log('start reading file', helpers.currentDateTime());
 
         fs.createReadStream(filename)
-            .pipe(parse({ delimiter: ";" }))
+            .pipe(parse({ delimiter: ";", from_line: 2 }))
             .on("data", function (row) {
                 dataArr.push(row);
             })
             .on("end", function () {
+                StoreName = 6;
+                dataArr.sort((a, b) => {
+                    if (a.StoreName < b.StoreName) {
+                      return -1;
+                    }
+                    if (a.StoreName > b.StoreName) {
+                      return 1;
+                    }
+                    return 0;
+                  });
                 console.log('File Readed!', helpers.currentDateTime());
                 method.orderCostAdded(dataArr);
                 method.orderDump(dataArr);
@@ -124,6 +130,7 @@ function getOrdersCsvData(callback) {
                 method.ordersPaymentPending(dataArr)
                 method.ordersShortTrackingNumber(dataArr)
                 method.ordersTrackingNumberAdded(dataArr)
+                callback(null, 'Method Call Done!');
             })
             .on("error", function (error) {
                 console.log(error.message);
@@ -134,9 +141,9 @@ function getOrdersCsvData(callback) {
     }
 }
 
-const methods = [exportcsv, getOrdersCsvData, method.getStores];
+const methods = [exportcsv, getOrdersCsvData, method.ordersMissing, method.getStores];
 
-cron.schedule('00 58 19 * * *', () => {
+cron.schedule('00 56 16 * * *', () => {
     async.series(methods, (err, results) => {
         if (err) {
             console.error(err);
